@@ -16,6 +16,8 @@ namespace FaaS.Data
 
         void Search();
 
+        void ListAll();
+
 
     }
 }

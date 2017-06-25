@@ -1,32 +1,29 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.IO;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;
 
 namespace FaaS.Controllers
 {
-    public class FileController : Controller
+    public class AccountController : Controller
     {
         public IActionResult Index()
         {
             return View();
         }
 
-        public IActionResult Upload(ICollection<IFormFile> files)
-        {            
-            return View();
-        }
-
-        public IActionResult Download(string fileName)
+        public IActionResult Login()
         {
-
             return View();
         }
 
-        public IActionResult Error()
+        public IActionResult Register()
+        {
+            return View();
+        }
+
+        public IActionResult Logout()
         {
             return View();
         }
