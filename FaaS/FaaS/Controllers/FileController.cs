@@ -10,6 +10,13 @@ namespace FaaS.Controllers
 {
     public class FileController : Controller
     {
+        private IUserManager UserManager { get; }
+
+        public FileController(IUserManager userManager)
+        {
+            UserManager = userManager;
+        }
+
         public IActionResult Index()
         {
             return View();

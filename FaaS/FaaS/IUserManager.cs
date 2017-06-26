@@ -5,7 +5,9 @@ using System.Threading.Tasks;
 
 namespace FaaS
 {
-    public class UserManager : IUserManager
+    public interface IUserManager
     {
+        
+
     }
 }

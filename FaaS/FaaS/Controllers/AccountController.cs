@@ -8,6 +8,13 @@ namespace FaaS.Controllers
 {
     public class AccountController : Controller
     {
+        private IUserManager UserManager { get; }
+
+        public AccountController(IUserManager userManager)
+        {
+            UserManager = userManager;
+        }
+
         public IActionResult Index()
         {
             return View();

@@ -34,6 +34,8 @@ namespace FaaS
                 options.SslPort = 44321;
                 options.Filters.Add(new RequireHttpsAttribute());
             });
+
+            services.AddSingleton<IUserManager, UserManager>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
