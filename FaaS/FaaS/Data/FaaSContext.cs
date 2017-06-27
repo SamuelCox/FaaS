@@ -10,6 +10,11 @@ namespace FaaS.Data
     public class FaaSContext : DbContext
     {
 
+        public FaaSContext(DbContextOptions<FaaSContext> options) : base(options)
+        {
+
+        }
+
         public virtual DbSet<User> Users { get; set; }
     }
 }

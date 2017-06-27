@@ -8,6 +8,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using FaaS.Data;
 
 namespace FaaS
 {
@@ -34,6 +36,9 @@ namespace FaaS
                 options.SslPort = 44377;
                 options.Filters.Add(new RequireHttpsAttribute());
             });
+
+            services.AddDbContext<FaaSContext>(options =>
+                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
             services.AddSingleton<IUserManager, UserManager>();
         }
@@ -62,7 +67,7 @@ namespace FaaS
             {
                 routes.MapRoute(
                     name: "default",
-                    template: "{controller=File}/{action=Index}/{id?}");
+                    template: "{controller=Account}/{action=Index}/{id?}");
             });
         }
     }
