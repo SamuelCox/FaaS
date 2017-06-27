@@ -31,7 +31,7 @@ namespace FaaS
             // Add framework services.
             services.AddMvc(options =>
             {
-                options.SslPort = 44321;
+                options.SslPort = 44377;
                 options.Filters.Add(new RequireHttpsAttribute());
             });
 
@@ -43,6 +43,8 @@ namespace FaaS
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
+
+            
 
             if (env.IsDevelopment())
             {
