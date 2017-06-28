@@ -14,5 +14,7 @@ namespace FaaS.Models
         public string PasswordHash { get; set; }
 
         public string Salt { get; set; }
+
+        public virtual ICollection<UserConnection> UserConnections { get; set; }
     }
 }

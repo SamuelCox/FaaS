@@ -15,6 +15,14 @@ namespace FaaS.Data
 
         }
 
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            builder.Entity<UserConnection>().HasKey(table => new {
+                table.UserName,
+                table.AzureConnectionStringID
+            });
+        }
+
         public virtual DbSet<User> Users { get; set; }
     }
 }

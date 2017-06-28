@@ -35,6 +35,8 @@ namespace FaaS.Controllers
             byte[] hash = KeyDerivation.Pbkdf2(password, salt, KeyDerivationPrf.HMACSHA1, 10000, 256 / 8);
             if(hash.SequenceEqual(key))
             {
+                Response.Cookies.Append("LoggedIn", "true");
+                Response.Cookies.Append("User", userName);
                 return RedirectToAction("Index", "File");
             }
             else
@@ -67,7 +69,9 @@ namespace FaaS.Controllers
                 Db.Users.Add(user);
                 Db.SaveChanges();
                 
-            }               
+            }
+            Response.Cookies.Append("LoggedIn", "true");
+            Response.Cookies.Append("User", userName);
             return RedirectToAction("Index", "File");
         }
 

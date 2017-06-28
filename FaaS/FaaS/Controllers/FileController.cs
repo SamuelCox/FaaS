@@ -22,7 +22,15 @@ namespace FaaS.Controllers
 
         public IActionResult Index()
         {
-            return View();
+            if (Request.Cookies["LoggedIn"] == "true")
+            {
+                return View();
+            }
+            else
+            {
+                return RedirectToAction("Account", "Index");
+            }
+            
         }
 
         public IActionResult Upload(ICollection<IFormFile> files)
