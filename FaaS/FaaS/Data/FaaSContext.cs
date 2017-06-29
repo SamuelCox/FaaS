@@ -24,5 +24,9 @@ namespace FaaS.Data
         }
 
         public virtual DbSet<User> Users { get; set; }
+
+        public virtual DbSet<UserConnection> UserConnections { get; set; }
+
+        public virtual DbSet<AzureConnectionString> AzureConnectionStrings { get; set; }
     }
 }

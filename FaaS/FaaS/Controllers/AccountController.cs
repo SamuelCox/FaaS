@@ -75,6 +75,41 @@ namespace FaaS.Controllers
             return RedirectToAction("Index", "File");
         }
 
+        public IActionResult Settings()
+        {
+            string userName = Request.Cookies["User"];
+            List<string> connections = (from u in Db.Users
+                                       join uc in Db.UserConnections on u.UserName equals uc.UserName
+                                       join azcs in Db.AzureConnectionStrings on
+                                       uc.AzureConnectionStringID equals azcs.AzureConnectionStringID
+                                       into joined
+                                       from x in joined.DefaultIfEmpty()
+                                       select x.ConnectionString).ToList();
+
+            Settings settings = new Settings();
+            settings.Connections = connections; 
+            return View("Settings", settings);
+        }
+
+        public void AddConnection(string userName, string connection)
+        {
+            AzureConnectionString connectionString = new AzureConnectionString();
+            connectionString.ConnectionString = connection;                        
+            Db.AzureConnectionStrings.Add(connectionString);                        
+            Db.SaveChanges();
+
+            UserConnection uc = new UserConnection();
+            uc.UserName = userName;
+            uc.AzureConnectionStringID = connectionString.AzureConnectionStringID;
+            Db.UserConnections.Add(uc);
+            Db.SaveChanges();
+
+            string x = "hi";
+
+
+
+        }
+
         public IActionResult Logout(string userName)
         {
             return View();
