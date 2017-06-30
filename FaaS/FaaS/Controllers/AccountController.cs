@@ -103,8 +103,7 @@ namespace FaaS.Controllers
             uc.AzureConnectionStringID = connectionString.AzureConnectionStringID;
             Db.UserConnections.Add(uc);
             Db.SaveChanges();
-
-            string x = "hi";
+            
 
 
 
