@@ -23,6 +23,19 @@ namespace FaaS.Data
             });
         }
 
+        public List<string> GetConnectionStrings(string username)
+        {
+            List<string> connections = (from u in Users
+                                        join uc in UserConnections on u.UserName equals uc.UserName
+                                        join azcs in AzureConnectionStrings on
+                                        uc.AzureConnectionStringID equals azcs.AzureConnectionStringID                                        
+                                        into joined
+                                        where u.UserName == username
+                                        from x in joined.DefaultIfEmpty()
+                                        select x.ConnectionString).ToList();
+            return connections;
+        }
+
         public virtual DbSet<User> Users { get; set; }
 
         public virtual DbSet<UserConnection> UserConnections { get; set; }

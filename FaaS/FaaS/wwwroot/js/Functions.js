@@ -1,8 +1,8 @@
 ﻿function addConnection(connection) {
-    XMLHttpRequest xhr = new XMLHttpRequest();
-    var cookie = getCookie('user');
-    var url = 'addconnection?userName=' + cookie + '&connection='connection;
-    xhr.open("POST", "AddConnection");
+    var xhr = new XMLHttpRequest();
+    var cookie = getCookie('User');
+    var url = 'Addconnection?userName=' + cookie + '&connection=' + connection;
+    xhr.open("POST", url);
     xhr.send();
 }
 

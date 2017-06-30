@@ -3,7 +3,7 @@
 @{
     ViewData["Title"] = "Settings";
 }
-
+<script src="~/js/Functions.js"></script>
 <h2>Settings</h2>
 
 
@@ -17,6 +17,6 @@
         }
         <div>
             <input type="text" id="newConnection" />
-            <button onclick="addConnection(document.getElementById('newConnection')">Save </button>
+            <button onclick="addConnection(document.getElementById('newConnection').value)">Save </button>
         </div>
 </div>

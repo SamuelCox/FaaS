@@ -27,5 +27,8 @@
   <ItemGroup>
     <Folder Include="Views\Account\" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="wwwroot\js\Functions.js" />
+  </ItemGroup>
 
 </Project>
