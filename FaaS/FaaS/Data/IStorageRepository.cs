@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -8,15 +9,15 @@ namespace FaaS.Data
     interface IStorageRepository
     {
 
-        void Persist();
+        Task Persist(string connectionString, string container, string blobName, FileStream fileStream);
         
 
-        void Delete();
+        Task Delete(string connectionString, string container, string blobName);
         
 
-        void Search();
+        void Search(string connectionString, string container, string blobName);
 
-        void ListAll();
+        Task ListAll(string connectionString);
 
 
     }
