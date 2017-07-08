@@ -22,7 +22,7 @@ namespace FaaS.Data
             await blob.DeleteAsync();            
         }
         
-        public async Task ListAll(string connectionString)
+        public async Task<List<IListBlobItem>> ListAll(string connectionString)
         {
             CloudStorageAccount account = CloudStorageAccount.Parse(connectionString);
             CloudBlobClient blobClient = account.CreateCloudBlobClient();
@@ -35,6 +35,21 @@ namespace FaaS.Data
                 containers.AddRange(segment.Results);
             }
             while (continuationToken != null);
+
+            List<IListBlobItem> blobResults = new List<IListBlobItem>();
+            foreach (CloudBlobContainer container in containers)
+            {
+                continuationToken = null;
+                do
+                {
+                    BlobResultSegment segment = await container.ListBlobsSegmentedAsync(continuationToken);
+                    continuationToken = segment.ContinuationToken;
+                    blobResults.AddRange(segment.Results);
+                }
+                while (continuationToken != null);
+                
+            }
+            return blobResults;
         }
         
         public async Task Persist(string connectionString, string container, string blobName, FileStream fileStream)
@@ -46,9 +61,15 @@ namespace FaaS.Data
             await blob.UploadFromStreamAsync(fileStream);
         }        
 
-        public void Search(string connectionString, string container, string blobName)
+        public async Task<MemoryStream> Search(string connectionString, string container, string blobName)
         {
-            throw new NotImplementedException();
+            CloudStorageAccount account = CloudStorageAccount.Parse(connectionString);
+            CloudBlobClient blobClient = account.CreateCloudBlobClient();
+            CloudBlobContainer containerRef = blobClient.GetContainerReference(container);
+            CloudBlockBlob blob = containerRef.GetBlockBlobReference(blobName);
+            MemoryStream stream = new MemoryStream();
+            await blob.DownloadToStreamAsync(stream);
+            return stream;
         }
     }
 }
