@@ -6,6 +6,7 @@ using System.IO;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using FaaS.Data;
+using FaaS.Results;
 
 namespace FaaS.Controllers
 {
@@ -13,11 +14,13 @@ namespace FaaS.Controllers
     {
         private IUserManager UserManager { get; }
         private readonly FaaSContext Db;
+        private readonly AzureStorageRepository repo;
 
         public FileController(IUserManager userManager, FaaSContext context)
         {
             UserManager = userManager;
             Db = context;
+            repo = new AzureStorageRepository();
         }
 
         public IActionResult Index()
@@ -33,15 +36,21 @@ namespace FaaS.Controllers
             
         }
 
-        public IActionResult Upload(ICollection<IFormFile> files)
-        {            
+        public async Task<IActionResult> Upload(ICollection<IFormFile> files, string connectionString, string container)
+        {
+            foreach(IFormFile file in files)
+            {
+                MemoryStream stream = new MemoryStream();
+                file.CopyTo(stream);
+                await repo.Persist(connectionString, container, file.FileName, stream);
+            }
             return View();
         }
 
-        public IActionResult Download(string fileName)
+        public async Task<IActionResult> Download(string connectionString, string container, string fileName)
         {
-
-            return View();
+            BlobResult result = await repo.Search(connectionString, container, fileName);
+            return new FileStreamResult(result.Stream, result.ContentType);
         }
 
         public IActionResult Error()

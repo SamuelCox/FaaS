@@ -6,12 +6,12 @@ using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
 using System.IO;
+using FaaS.Results;
 
 namespace FaaS.Data
 {
     public class AzureStorageRepository : IStorageRepository
-    {
-        
+    {        
 
         public async Task Delete(string connectionString, string container, string blobName)
         {
@@ -52,16 +52,16 @@ namespace FaaS.Data
             return blobResults;
         }
         
-        public async Task Persist(string connectionString, string container, string blobName, FileStream fileStream)
+        public async Task Persist(string connectionString, string container, string blobName, MemoryStream memoryStream)
         {
             CloudStorageAccount account = CloudStorageAccount.Parse(connectionString);
             CloudBlobClient blobClient = account.CreateCloudBlobClient();
             CloudBlobContainer containerRef = blobClient.GetContainerReference(container);
             CloudBlockBlob blob = containerRef.GetBlockBlobReference(blobName);
-            await blob.UploadFromStreamAsync(fileStream);
+            await blob.UploadFromStreamAsync(memoryStream);
         }        
 
-        public async Task<MemoryStream> Search(string connectionString, string container, string blobName)
+        public async Task<BlobResult> Search(string connectionString, string container, string blobName)
         {
             CloudStorageAccount account = CloudStorageAccount.Parse(connectionString);
             CloudBlobClient blobClient = account.CreateCloudBlobClient();
@@ -69,7 +69,7 @@ namespace FaaS.Data
             CloudBlockBlob blob = containerRef.GetBlockBlobReference(blobName);
             MemoryStream stream = new MemoryStream();
             await blob.DownloadToStreamAsync(stream);
-            return stream;
+            return new BlobResult(blob.Properties.ContentType, stream);
         }
     }
 }

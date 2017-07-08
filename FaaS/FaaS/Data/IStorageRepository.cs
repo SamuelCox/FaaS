@@ -10,7 +10,7 @@ namespace FaaS.Data
     interface IStorageRepository
     {
 
-        Task Persist(string connectionString, string container, string blobName, FileStream fileStream);
+        Task Persist(string connectionString, string container, string blobName, MemoryStream memoryStream);
         
 
         Task Delete(string connectionString, string container, string blobName);
