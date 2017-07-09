@@ -9,15 +9,13 @@ namespace FaaS.Models
 {
     public class UserConnection
     {
-        [Key, Column(Order = 0)]
-        [ForeignKey("User")]
-        public string UserName { get; set; }
+        [Key, Column(Order = 0)]        
+        public string Id { get; set; }
 
         
         public virtual User User { get; set; }
 
-        [Key, Column( Order = 1)]
-        [ForeignKey("AzureConnectionString")]
+        [Key, Column( Order = 1)]        
         public int AzureConnectionStringID { get; set; }
 
         

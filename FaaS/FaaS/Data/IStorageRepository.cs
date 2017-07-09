@@ -1,4 +1,5 @@
-﻿using Microsoft.WindowsAzure.Storage.Blob;
+﻿using FaaS.Results;
+using Microsoft.WindowsAzure.Storage.Blob;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -16,7 +17,7 @@ namespace FaaS.Data
         Task Delete(string connectionString, string container, string blobName);
         
 
-        Task<MemoryStream> Search(string connectionString, string container, string blobName);
+        Task<BlobResult> Search(string connectionString, string container, string blobName);
 
         Task<List<IListBlobItem>> ListAll(string connectionString);
 

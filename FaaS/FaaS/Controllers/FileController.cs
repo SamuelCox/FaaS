@@ -7,50 +7,78 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using FaaS.Data;
 using FaaS.Results;
+using Microsoft.AspNetCore.Identity;
+using FaaS.Models;
 
 namespace FaaS.Controllers
 {
     public class FileController : Controller
     {
-        private IUserManager UserManager { get; }
+        private readonly UserManager<User> _userManager;
+        private readonly SignInManager<User> _signInManager;
         private readonly FaaSContext Db;
         private readonly AzureStorageRepository repo;
 
-        public FileController(IUserManager userManager, FaaSContext context)
+        public FileController(UserManager<User> userManager,
+                                 SignInManager<User> signInManager,
+                                 FaaSContext context)
         {
-            UserManager = userManager;
+            _userManager = userManager;
+            _signInManager = signInManager;
             Db = context;
             repo = new AzureStorageRepository();
         }
 
         public IActionResult Index()
         {
-            if (Request.Cookies["LoggedIn"] == "true")
-            {
+            if (_signInManager.IsSignedIn(HttpContext.User))
+            {                
                 return View();
             }
             else
             {
-                return RedirectToAction("Account", "Index");
+                return RedirectToAction("Index", "Account");
             }
+            
             
         }
 
         public async Task<IActionResult> Upload(ICollection<IFormFile> files, string connectionString, string container)
         {
-            foreach(IFormFile file in files)
+            if (_signInManager.IsSignedIn(HttpContext.User))
             {
-                MemoryStream stream = new MemoryStream();
-                file.CopyTo(stream);
-                await repo.Persist(connectionString, container, file.FileName, stream);
+                foreach (IFormFile file in files)
+                {
+                    MemoryStream stream = new MemoryStream();
+                    file.CopyTo(stream);
+                    await repo.Persist(connectionString, container, file.FileName, stream);
+                }
+                return View();
             }
-            return View();
+            else
+            {
+                return RedirectToAction("Index", "Account");
+            }
+            
+            
+            
+            
+            
         }
 
         public async Task<IActionResult> Download(string connectionString, string container, string fileName)
         {
-            BlobResult result = await repo.Search(connectionString, container, fileName);
-            return new FileStreamResult(result.Stream, result.ContentType);
+            if (_signInManager.IsSignedIn(HttpContext.User))
+            {
+                BlobResult result = await repo.Search(connectionString, container, fileName);
+                return new FileStreamResult(result.Stream, result.ContentType);
+            }
+            else
+            {
+                return RedirectToAction("Index", "Account");
+            }
+            
+            
         }
 
         public IActionResult Error()

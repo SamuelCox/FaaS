@@ -7,17 +7,23 @@ using FaaS.Data;
 using FaaS.Models;
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace FaaS.Controllers
 {
     public class AccountController : Controller
     {
-        private IUserManager UserManager { get; }
+        private readonly UserManager<User> _userManager;
+        private readonly SignInManager<User> _signInManager;
         private readonly FaaSContext Db;
 
-        public AccountController(IUserManager userManager, FaaSContext context)
+        public AccountController(UserManager<User> userManager,
+                                 SignInManager<User> signInManager,
+                                 FaaSContext context)
         {
-            UserManager = userManager;
+            _userManager = userManager;
+            _signInManager = signInManager;
             Db = context;
         }
 
@@ -26,71 +32,62 @@ namespace FaaS.Controllers
             return View("Login");
         }
 
-        public IActionResult Login(string userName, string password)
+        public async Task<IActionResult> Login(string userName, string email, string password)
         {
-            
-            User user = Db.Users.Where(x => x.UserName == userName).FirstOrDefault();
-            byte[] salt = Convert.FromBase64String(user.Salt);
-            byte[] key = Convert.FromBase64String(user.PasswordHash);
-            byte[] hash = KeyDerivation.Pbkdf2(password, salt, KeyDerivationPrf.HMACSHA1, 10000, 256 / 8);
-            if(hash.SequenceEqual(key))
+            User user = new User();
+            user.UserName = userName;
+            user.Email = email;            
+            var result = await _signInManager.PasswordSignInAsync(user, password, false, false);
+            if(result.Succeeded)
             {
-                Response.Cookies.Append("LoggedIn", "true");
-                Response.Cookies.Append("User", userName);
                 return RedirectToAction("Index", "File");
             }
             else
             {
-                return View();
+                return RedirectToAction("Index", "Account");
             }
-
-
-            
-
             
         }
 
-        public IActionResult Register(string userName, string password)
+        public async Task<IActionResult> Register(string userName, string email, string password)
         {
             Db.Database.EnsureCreated();
-            using (RandomNumberGenerator rng = RandomNumberGenerator.Create())
+            User user = new User();
+            user.UserName = userName;
+            user.Email = email;
+            var result = await _userManager.CreateAsync(user, password);
+            if(result.Succeeded)
             {
-                byte[] salt = new byte[128 / 8];
-                rng.GetBytes(salt);
-
-                byte[] key = KeyDerivation.Pbkdf2(password, salt, KeyDerivationPrf.HMACSHA1, 10000, 256 / 8);
-
-                string keyHexString = Convert.ToBase64String(key);
-                
-                User user = new User();
-                user.UserName = userName;
-                user.PasswordHash = keyHexString;
-                user.Salt = Convert.ToBase64String(salt);
-                Db.Users.Add(user);
-                Db.SaveChanges();
-                
+                await _signInManager.SignInAsync(user, isPersistent: false);
+                return RedirectToAction("Index", "File");
             }
-            Response.Cookies.Append("LoggedIn", "true");
-            Response.Cookies.Append("User", userName);
-            return RedirectToAction("Index", "File");
+            else
+            {
+                return RedirectToAction("Index", "Account");
+            }
         }
 
-        public IActionResult Settings()
+        public async Task<IActionResult> Settings()
         {
-            string userName = Request.Cookies["User"];
-            List<string> connections = Db.GetConnectionStrings(userName);
+            if (_signInManager.IsSignedIn(HttpContext.User))
+            {
+                
+                User user = await _userManager.GetUserAsync(HttpContext.User);                
+                List<string> connections = Db.GetConnectionStrings(user.UserName);
 
-            Settings settings = new Settings();
-            settings.Connections = connections; 
-            return View("Settings", settings);
+                Settings settings = new Settings();
+                settings.Connections = connections;
+                return View("Settings", settings);
+            }
+            else
+            {
+                return RedirectToAction("Index", "Account");
+            }
         }
 
         public void AddConnection(string userName, string connection)
         {
-            if(Request.Cookies["User"] != userName)
-            {
-                return;
-            }
+            
             AzureConnectionString connectionString = Db.AzureConnectionStrings
                                                         .Where(x => x.ConnectionString == connection).FirstOrDefault();
             if(connectionString == null)
@@ -99,10 +96,11 @@ namespace FaaS.Controllers
                 connectionString.ConnectionString = connection;
                 Db.AzureConnectionStrings.Add(connectionString);
                 Db.SaveChanges();
-            }                       
+            }
+            User user = Db.Users.Where(x => x.UserName == userName).FirstOrDefault();
 
             UserConnection uc = new UserConnection();
-            uc.UserName = userName;
+            uc.Id = user.Id;
             uc.AzureConnectionStringID = connectionString.AzureConnectionStringID;
             Db.UserConnections.Add(uc);
             Db.SaveChanges();            

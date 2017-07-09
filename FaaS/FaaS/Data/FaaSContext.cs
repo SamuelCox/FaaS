@@ -1,4 +1,5 @@
 ﻿using FaaS.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace FaaS.Data
 {
-    public class FaaSContext : DbContext
+    public class FaaSContext : IdentityDbContext<User, IdentityRole<string>,string>
     {
 
         public FaaSContext(DbContextOptions<FaaSContext> options) : base(options)
@@ -17,8 +18,30 @@ namespace FaaS.Data
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
+            builder.Entity<IdentityUser<string>>(i =>
+            {                
+                i.HasKey(x => x.Id);
+            });
+
+            builder.Entity<IdentityUserLogin<string>>(i =>
+            {
+                i.HasKey(x => x.UserId);
+
+            });
+
+            builder.Entity<IdentityUserRole<string>>(i =>
+            {
+                i.HasKey(x => x.UserId);
+
+            });
+
+            builder.Entity<IdentityUserToken<string>>(i =>
+            {
+                i.HasKey(x => x.UserId);
+            });
+
             builder.Entity<UserConnection>().HasKey(table => new {
-                table.UserName,
+                table.Id,
                 table.AzureConnectionStringID
             });
         }
@@ -26,7 +49,7 @@ namespace FaaS.Data
         public List<string> GetConnectionStrings(string username)
         {
             List<string> connections = (from u in Users
-                                        join uc in UserConnections on u.UserName equals uc.UserName
+                                        join uc in UserConnections on u.Id equals uc.Id
                                         join azcs in AzureConnectionStrings on
                                         uc.AzureConnectionStringID equals azcs.AzureConnectionStringID                                        
                                         into joined
