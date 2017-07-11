@@ -8,11 +8,12 @@
 
 
 <div>
-    <h1>@ViewBag.Message</h1>
+    
         @{
-            foreach(string x in Model.Connections) {
+            foreach(AzureConnectionString x in Model.Connections) {
                 <div>
-                    <input type="text" value="@x" />
+                    <input type="text" id="@x.AzureConnectionStringID" value="@x.ConnectionString" />
+                    <button onclick="modifyConnection(@x.AzureConnectionStringID , document.getElementById(@x.AzureConnectionStringID).value)">Save</button>
                 </div>
             }
         }

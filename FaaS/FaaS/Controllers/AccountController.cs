@@ -9,6 +9,7 @@ using System.Security.Cryptography;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
 namespace FaaS.Controllers
 {
@@ -37,7 +38,7 @@ namespace FaaS.Controllers
             User user = new User();
             user.UserName = userName;
             user.Email = email;            
-            var result = await _signInManager.PasswordSignInAsync(user, password, false, false);
+            var result = await _signInManager.PasswordSignInAsync(user.Email, password, false, false);            
             if(result.Succeeded)
             {
                 return RedirectToAction("Index", "File");
@@ -73,7 +74,7 @@ namespace FaaS.Controllers
             {
                 
                 User user = await _userManager.GetUserAsync(HttpContext.User);                
-                List<string> connections = Db.GetConnectionStrings(user.UserName);
+                List<AzureConnectionString> connections = Db.GetConnectionStrings(user.UserName);
 
                 Settings settings = new Settings();
                 settings.Connections = connections;
@@ -85,7 +86,7 @@ namespace FaaS.Controllers
             }
         }
 
-        public void AddConnection(string userName, string connection)
+        public async Task AddConnection(string connection)
         {
             
             AzureConnectionString connectionString = Db.AzureConnectionStrings
@@ -97,7 +98,8 @@ namespace FaaS.Controllers
                 Db.AzureConnectionStrings.Add(connectionString);
                 Db.SaveChanges();
             }
-            User user = Db.Users.Where(x => x.UserName == userName).FirstOrDefault();
+            User user = await _userManager.GetUserAsync(HttpContext.User);
+            
 
             UserConnection uc = new UserConnection();
             uc.Id = user.Id;
@@ -105,6 +107,28 @@ namespace FaaS.Controllers
             Db.UserConnections.Add(uc);
             Db.SaveChanges();            
 
+        }
+
+        public async Task ModifyConnection(int id, string connectionString)
+        {
+            User user = await _userManager.GetUserAsync(HttpContext.User);
+            AzureConnectionString connection = Db.AzureConnectionStrings.Where(x => x.AzureConnectionStringID == id).FirstOrDefault();
+            UserConnection uc = Db.UserConnections.Where(x => x.AzureConnectionStringID == connection.AzureConnectionStringID && x.Id == user.Id).FirstOrDefault();
+            if(uc != null)
+            {
+                AzureConnectionString newConnection = new AzureConnectionString();
+                newConnection.ConnectionString = connectionString;
+                Db.AzureConnectionStrings.Add(newConnection);
+                Db.SaveChanges();
+
+                Db.UserConnections.Remove(uc);
+                Db.SaveChanges();
+
+                uc.AzureConnectionStringID = newConnection.AzureConnectionStringID;
+                Db.UserConnections.Add(uc);                
+                Db.SaveChanges();
+
+            }
         }
 
         public IActionResult Logout(string userName)

@@ -8,7 +8,7 @@ namespace FaaS.Models
     public class Settings
     {        
 
-        public  List<string> Connections { get; set; }
+        public  List<AzureConnectionString> Connections { get; set; }
 
     }
 }
