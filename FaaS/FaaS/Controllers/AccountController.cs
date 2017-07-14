@@ -73,7 +73,8 @@ namespace FaaS.Controllers
             if (_signInManager.IsSignedIn(HttpContext.User))
             {
                 
-                User user = await _userManager.GetUserAsync(HttpContext.User);                
+                User user = await _userManager.GetUserAsync(HttpContext.User);
+                ViewBag.Greeting = user.UserName;
                 List<AzureConnectionString> connections = Db.GetConnectionStrings(user.UserName);
 
                 Settings settings = new Settings();
@@ -129,6 +130,21 @@ namespace FaaS.Controllers
                 Db.SaveChanges();
 
             }
+        }
+
+        public async Task DeleteConnection(int id)
+        {
+            User user = await _userManager.GetUserAsync(HttpContext.User);
+            AzureConnectionString connection = Db.AzureConnectionStrings.Where(x => x.AzureConnectionStringID == id).FirstOrDefault();
+            UserConnection uc = Db.UserConnections.Where(x => x.AzureConnectionStringID == connection.AzureConnectionStringID && x.Id == user.Id).FirstOrDefault();
+            if(uc != null)
+            {
+                Db.AzureConnectionStrings.Remove(connection);
+                Db.SaveChanges();
+                Db.UserConnections.Remove(uc);
+                Db.SaveChanges();
+            }
+
         }
 
         public IActionResult Logout(string userName)

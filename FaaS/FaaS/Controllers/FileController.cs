@@ -9,6 +9,7 @@ using FaaS.Data;
 using FaaS.Results;
 using Microsoft.AspNetCore.Identity;
 using FaaS.Models;
+using Microsoft.WindowsAzure.Storage.Blob;
 
 namespace FaaS.Controllers
 {
@@ -29,11 +30,17 @@ namespace FaaS.Controllers
             repo = new AzureStorageRepository();
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             if (_signInManager.IsSignedIn(HttpContext.User))
-            {                
-                return View();
+            {
+                FileIndexModel model = new FileIndexModel();
+                List<IListBlobItem> blobs = await repo.ListAll(null);
+                foreach(CloudBlob blob in blobs)
+                {
+                    model.AddItem(blob.Container.Name, blob);
+                }
+                return View(model);
             }
             else
             {
@@ -43,7 +50,7 @@ namespace FaaS.Controllers
             
         }
 
-        public async Task<IActionResult> Upload(ICollection<IFormFile> files, string connectionString, string container)
+        public async Task<IActionResult> Upload(string container, ICollection<IFormFile> files, string connectionString)
         {
             if (_signInManager.IsSignedIn(HttpContext.User))
             {

@@ -2,18 +2,20 @@
 @model Settings
 @{
     ViewData["Title"] = "Settings";
+    
 }
-<script src="~/js/Functions.js"></script>
+<script src="~/js/settings.js"></script>
 <h2>Settings</h2>
 
 
 <div>
-    
+        <h3>Hi, @ViewBag.Greeting</h3>
         @{
             foreach(AzureConnectionString x in Model.Connections) {
                 <div>
                     <input type="text" id="@x.AzureConnectionStringID" value="@x.ConnectionString" />
                     <button onclick="modifyConnection(@x.AzureConnectionStringID , document.getElementById(@x.AzureConnectionStringID).value)">Save</button>
+                    <button onclick="deleteConnection(@x.AzureConnectionStringID)">Delete</button>
                 </div>
             }
         }
