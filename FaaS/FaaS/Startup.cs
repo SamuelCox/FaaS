@@ -14,6 +14,7 @@ using Microsoft.EntityFrameworkCore;
 using FaaS.Data;
 using FaaS.Models;
 
+
 namespace FaaS
 {
     public class Startup
@@ -40,8 +41,7 @@ namespace FaaS
                 options.Filters.Add(new RequireHttpsAttribute());
             });
 
-            
-
+                        
             services.AddDbContext<FaaSContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 

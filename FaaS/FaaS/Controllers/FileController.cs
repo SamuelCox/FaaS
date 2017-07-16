@@ -33,14 +33,23 @@ namespace FaaS.Controllers
         public async Task<IActionResult> Index()
         {
             if (_signInManager.IsSignedIn(HttpContext.User))
-            {
-                FileIndexModel model = new FileIndexModel();
-                List<IListBlobItem> blobs = await repo.ListAll(null);
-                foreach(CloudBlob blob in blobs)
+            {                
+                List<FileIndexModel> models = new List<FileIndexModel>();
+                User user = await _userManager.GetUserAsync(HttpContext.User);
+                List<AzureConnectionString> connections = Db.GetConnectionStrings(user.UserName);
+                foreach (AzureConnectionString connection in connections)
                 {
-                    model.AddItem(blob.Container.Name, blob);
+                    FileIndexModel model = new FileIndexModel();
+                    model.ConnectionString = connection.ConnectionString;
+                    List<IListBlobItem> blobs = await repo.ListAll(connection.ConnectionString);
+
+                    foreach (CloudBlob blob in blobs)
+                    {
+                        model.AddItem(blob.Container.Name, blob);
+                    }
+                    models.Add(model);
                 }
-                return View(model);
+                return View(models);
             }
             else
             {

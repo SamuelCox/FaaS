@@ -1,37 +1,48 @@
 ﻿@using FaaS.Models
 @using Microsoft.WindowsAzure.Storage.Blob
-@model FileIndexModel
+@model IEnumerable<FileIndexModel>
 @{
     ViewData["Title"] = "Home Page";
 }
 <div class="row">
     <form method="post" asp-action="Upload" asp-controller="File" enctype="multipart/form-data">
-        <input type="text" name="container" />
-        <input type="file" name="files" multiple />
-        <input type="submit" value="Upload" />
-    </form>
+        <div class="col-sm-2">
+            <input type="text" name="container" />
+        </div>
+        
+        <div class="col-sm-2">
+            <input type="file" name="files" multiple />                
+            <input type="submit" value="Upload" />
+        </div>
+</form>
 </div>
 
-@foreach(KeyValuePair<string, List<CloudBlob>> kvp in Model.GetAllContainers())
+@foreach (FileIndexModel fileIndex in Model)
 {
-    <div>
-        <div class="container">
-            <h3>@kvp.Key</h3>
-            <div class="row">
-                @foreach (CloudBlob blob in kvp.Value)
-                {
+    <h2>@fileIndex.ConnectionString</h2>
+    foreach (KeyValuePair<string, List<CloudBlob>> kvp in fileIndex.GetAllContainers())
+    {
+        <div>
+            <div class="container">
+                <h3>@kvp.Key</h3>
+                <div class="row">
+                    @foreach (CloudBlob blob in kvp.Value)
+                    {
 
 
-                    <div class="col-md-2">
-                        <img data-src="holder.js/100px280/thumb" alt="Card image cap">
-                        <p class="card-text">Hi</p>
-                    </div>
+                        <div class="col-md-2">
+                            <img data-src="holder.js/100px280/thumb" alt="Card image cap">
+                            <p class="card-text">Hi</p>
+                        </div>
 
 
-                }
+                    }
+                </div>
+
             </div>
-
         </div>
-    </div>
+    }
 }
+
+
 

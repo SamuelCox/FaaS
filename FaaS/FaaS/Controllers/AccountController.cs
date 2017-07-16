@@ -5,11 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using FaaS.Data;
 using FaaS.Models;
-using System.Security.Cryptography;
-using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
 
 namespace FaaS.Controllers
 {
@@ -33,12 +29,12 @@ namespace FaaS.Controllers
             return View("Login");
         }
 
-        public async Task<IActionResult> Login(string userName, string email, string password)
+        public async Task<IActionResult> Login(LoginModel model)
         {
             User user = new User();
-            user.UserName = userName;
-            user.Email = email;            
-            var result = await _signInManager.PasswordSignInAsync(user.Email, password, false, false);            
+            user.UserName = model.UserName;
+            user.Email = model.Email;            
+            var result = await _signInManager.PasswordSignInAsync(user.Email, model.Password, false, false);            
             if(result.Succeeded)
             {
                 return RedirectToAction("Index", "File");
@@ -50,13 +46,13 @@ namespace FaaS.Controllers
             
         }
 
-        public async Task<IActionResult> Register(string userName, string email, string password)
+        public async Task<IActionResult> Register(LoginModel model)
         {
             Db.Database.EnsureCreated();
             User user = new User();
-            user.UserName = userName;
-            user.Email = email;
-            var result = await _userManager.CreateAsync(user, password);
+            user.UserName = model.UserName;
+            user.Email = model.Email;
+            var result = await _userManager.CreateAsync(user, model.Password);
             if(result.Succeeded)
             {
                 await _signInManager.SignInAsync(user, isPersistent: false);
@@ -147,8 +143,9 @@ namespace FaaS.Controllers
 
         }
 
-        public IActionResult Logout(string userName)
-        {
+        public async Task<IActionResult> Logout()
+        {            
+            await _signInManager.SignOutAsync();
             return View();
         }
 

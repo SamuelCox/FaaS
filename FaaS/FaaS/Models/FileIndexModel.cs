@@ -8,6 +8,8 @@ namespace FaaS.Models
 {
     public class FileIndexModel
     {
+        public string ConnectionString { get; set; }
+
         private Dictionary<string,List<CloudBlob>> ContainerFiles { get; set; }
 
         public FileIndexModel()
