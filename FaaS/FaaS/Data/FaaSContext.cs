@@ -59,7 +59,7 @@ namespace FaaS.Data
             return connections;
         }
 
-        public virtual DbSet<User> Users { get; set; }
+        public new DbSet<User> Users { get; set; }
 
         public virtual DbSet<UserConnection> UserConnections { get; set; }
 

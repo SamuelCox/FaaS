@@ -41,7 +41,9 @@ namespace FaaS
                 options.Filters.Add(new RequireHttpsAttribute());
             });
 
-                        
+
+            services.AddMemoryCache();
+            
             services.AddDbContext<FaaSContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using FaaS.Data;
 using FaaS.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace FaaS.Controllers
 {
@@ -14,14 +15,17 @@ namespace FaaS.Controllers
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
         private readonly FaaSContext Db;
+        private readonly IMemoryCache _cache;
 
         public AccountController(UserManager<User> userManager,
                                  SignInManager<User> signInManager,
-                                 FaaSContext context)
+                                 FaaSContext context,
+                                 IMemoryCache cache)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             Db = context;
+            _cache = cache;
         }
 
         public IActionResult Index()
@@ -31,6 +35,11 @@ namespace FaaS.Controllers
 
         public async Task<IActionResult> Login(LoginModel model)
         {
+            if(!ModelState.IsValid)
+            {
+                ViewBag.Error = "Some login data was invalid";
+                return RedirectToAction("Index", "Account");
+            }
             User user = new User();
             user.UserName = model.UserName;
             user.Email = model.Email;            
