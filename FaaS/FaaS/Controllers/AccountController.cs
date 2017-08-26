@@ -94,7 +94,7 @@ namespace FaaS.Controllers
 
         public async Task AddConnection(string connection)
         {
-            
+            _cache.Remove(HttpContext.User.ToString() + "_files");
             AzureConnectionString connectionString = Db.AzureConnectionStrings
                                                         .Where(x => x.ConnectionString == connection).FirstOrDefault();
             if(connectionString == null)
@@ -155,7 +155,7 @@ namespace FaaS.Controllers
         public async Task<IActionResult> Logout()
         {            
             await _signInManager.SignOutAsync();
-            return View();
+            return RedirectToAction("Index", "Account");
         }
 
 
